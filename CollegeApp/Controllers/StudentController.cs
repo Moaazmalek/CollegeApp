@@ -10,6 +10,7 @@ namespace CollegeApp.Controller
     public class StudentController : ControllerBase
     {
         [HttpGet]
+        [Route("All")]
         public IEnumerable<Student> GetStudents()
         {
             return CollegeRepository.Students;
@@ -24,7 +25,7 @@ namespace CollegeApp.Controller
         public Student GetStudentByName(string name)
         {
 
-            return CollegeRepository.Students.FirstOrDefault(s => s.Name==name);
+            return CollegeRepository.Students.FirstOrDefault(s => s.Name == name);
         }
         [HttpDelete("{id:int}")]
         public IActionResult DeleteStudent(int id)
@@ -41,4 +42,5 @@ namespace CollegeApp.Controller
 
 
         }
+    }
 }
