@@ -7,7 +7,7 @@ namespace CollegeApp.Data
     public class CollegeDBContext(DbContextOptions options): DbContext(options)
     {
 
-       DbSet<Student> Students { get; set; }
+       public DbSet<Student> Students { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

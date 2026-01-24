@@ -12,8 +12,9 @@ namespace CollegeApp.DTOs
         [EmailAddress(ErrorMessage ="Please enter valid email address")]
         public required string Email { get; set; }
         public required string Address { get; set; }
-        [DateCheck]
-        public DateTime AdmissionDate { get; set; }
+        //[DateCheck]
+        //public DateTime AdmissionDate { get; set; }
+        public  DateTime DOB { get; set; }
     }
 }
    
