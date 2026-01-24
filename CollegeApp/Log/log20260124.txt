@@ -1,0 +1,15 @@
+2026-01-24 04:35:10.851 +03:00 [INF] Now listening on: https://localhost:7096
+2026-01-24 04:35:11.028 +03:00 [INF] Now listening on: http://localhost:5224
+2026-01-24 04:35:11.334 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-01-24 04:35:11.334 +03:00 [INF] Hosting environment: Development
+2026-01-24 04:35:11.334 +03:00 [INF] Content root path: D:\CSharp\CollegeApp\CollegeApp
+2026-01-24 05:43:07.562 +03:00 [INF] Now listening on: https://localhost:7096
+2026-01-24 05:43:07.595 +03:00 [INF] Now listening on: http://localhost:5224
+2026-01-24 05:43:07.742 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-01-24 05:43:07.742 +03:00 [INF] Hosting environment: Development
+2026-01-24 05:43:07.742 +03:00 [INF] Content root path: D:\CSharp\CollegeApp\CollegeApp
+2026-01-24 05:56:19.270 +03:00 [INF] Now listening on: https://localhost:7096
+2026-01-24 05:56:19.313 +03:00 [INF] Now listening on: http://localhost:5224
+2026-01-24 05:56:19.380 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-01-24 05:56:19.380 +03:00 [INF] Hosting environment: Development
+2026-01-24 05:56:19.380 +03:00 [INF] Content root path: D:\CSharp\CollegeApp\CollegeApp
