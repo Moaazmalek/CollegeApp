@@ -1,12 +1,13 @@
-﻿using CollegeApp.Data;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using CollegeApp.Configurations;
+using CollegeApp.Data;
 using CollegeApp.DTOs;
 using CollegeApp.Models;
-using CollegeApp.Validators;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+
 
 namespace CollegeApp.Controllers
 {
@@ -15,23 +16,35 @@ namespace CollegeApp.Controllers
     public class StudentController : ControllerBase
     {
         private readonly CollegeDBContext _context;
+        private readonly IMapper _mapper;
 
-        public StudentController(CollegeDBContext dbContext)
+        public StudentController(CollegeDBContext dbContext, IMapper mapper)
         {
             _context = dbContext;
+            _mapper = mapper;
         }
 
         [HttpGet("All")]
         public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
         {
-            var students = await _context.Students.Select(s => new StudentDTO()
-            {
-                Name = s.Name,
-                Email = s.Email,
-                Address = s.Address,
-                DOB = s.DOB
+            //Good For Performance but Manual Mapping
+            //var students = await _context.Students.Select(s => new StudentDTO()
+            //{
+            //    Name = s.Name,
+            //    Email = s.Email,
+            //    Address = s.Address,
+            //    DOB = s.DOB
 
-            }).ToListAsync();
+            //}).ToListAsync();
+
+            //Using AutoMapper but bad for performance
+
+            //var students = await _context.Students.ToListAsync();
+            //var studentDTOData=_mapper.Map<List<StudentDTO>>(students);
+
+            //Good for performance and AutoMapper
+            var students = await _context.Students.ProjectTo<StudentDTO>(_mapper.ConfigurationProvider)
+                .ToListAsync();
             return Ok(students);
 
         }
@@ -50,14 +63,8 @@ namespace CollegeApp.Controllers
             if(string.IsNullOrEmpty(name)) return BadRequest();
             var student = await _context.Students.FirstOrDefaultAsync(s => s.Name == name);
             if (student == null) return NotFound();
-            var studentDto = new StudentDTO
-            {
-                Id = student.Id,
-                Name = student.Name,
-                Email = student.Email,
-                Address = student.Address,
-                DOB = student.DOB
-            };
+            
+            var studentDto= _mapper.Map<StudentDTO>(student);
             return Ok(studentDto);
         }
 
@@ -69,20 +76,9 @@ namespace CollegeApp.Controllers
             var existingStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == model.Id);
             if (existingStudent == null) return NotFound();
 
-            var newRecord = new Student()
-            {
-                Id = existingStudent.Id,
-                Name = model.Name,
-                Email = model.Email,
-                Address = model.Address,
-                DOB = model.DOB
-            };
+            var newRecord = _mapper.Map<Student>(model);
             _context.Students.Update(newRecord);
-            //existingStudent.Name = model.Name;
-            //existingStudent.Email = model.Email;
-            //existingStudent.Address = model.Address;
-            //existingStudent.DOB = model.DOB;
-
+           
             await _context.SaveChangesAsync();
             return model;
         }
@@ -95,13 +91,7 @@ namespace CollegeApp.Controllers
             var existingStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
             if (existingStudent is null) return NotFound();
 
-            var student = new StudentDTO
-            {
-                Id = existingStudent.Id,
-                Name = existingStudent.Name,
-                Email = existingStudent.Email,
-                Address = existingStudent.Address
-            };
+            var student = _mapper.Map<StudentDTO>(existingStudent);
 
             patchDocument.ApplyTo(student, ModelState);
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -119,15 +109,9 @@ namespace CollegeApp.Controllers
         {
             if (model is null) return BadRequest();
 
-            Student student = new()
-            {
-                Name = model.Name,
-                Email = model.Email,
-                Address = model.Address,
-                DOB = model.DOB
-            };
+            Student student =_mapper.Map<Student>(model);
 
-            _context.Students.Add(student);
+            await  _context.Students.AddAsync(student);
             await _context.SaveChangesAsync();
 
             model.Id = student.Id; // return the generated Id
