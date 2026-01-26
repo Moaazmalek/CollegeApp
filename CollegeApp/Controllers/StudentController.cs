@@ -19,12 +19,13 @@ namespace CollegeApp.Controllers
       
         private readonly IMapper _mapper;
         private readonly IGenericRepository<Student> _repository;
+        private readonly IStudentRepository _studentRepository;
 
-        public StudentController( IMapper mapper,IGenericRepository<Student> repository)
-        {
-          
+        public StudentController( IMapper mapper,IGenericRepository<Student> repository,IStudentRepository studentRepository)
+        { 
             _mapper = mapper;
             _repository = repository;
+            _studentRepository = studentRepository;
         }
 
         [HttpGet("All")]

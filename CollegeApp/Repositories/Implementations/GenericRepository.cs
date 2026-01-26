@@ -13,12 +13,10 @@ namespace CollegeApp.Repositories.Implementations
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         private readonly CollegeDBContext _context;
-        private readonly IMapper _mapper;
         private readonly DbSet<T> _dbSet;
-        public GenericRepository(CollegeDBContext context, IMapper mapper)
+        public GenericRepository(CollegeDBContext context)
         {
             _context = context;
-            _mapper = mapper;
             _dbSet = _context.Set<T>();
 
         }
