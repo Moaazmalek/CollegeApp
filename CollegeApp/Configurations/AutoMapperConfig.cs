@@ -7,7 +7,8 @@ namespace CollegeApp.Configurations
     {
         public AutoMapperConfig()
         {
-            CreateMap<Student, StudentDTO>().ReverseMap();
+            //Add Transfromation rules here
+            CreateMap<Student, StudentDTO>().ReverseMap().ForMember( d => d.Address,opt => opt.NullSubstitute("Address not found"));
         }
 
     }

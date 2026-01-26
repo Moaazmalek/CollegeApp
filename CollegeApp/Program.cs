@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using CollegeApp.Configurations;
 using CollegeApp.Data;
+using CollegeApp.Repositories.Implementations;
+using CollegeApp.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Serilog;
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +34,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(AutoMapperConfig));
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 var app = builder.Build();
 

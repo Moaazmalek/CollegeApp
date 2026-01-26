@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.Reflection.Emit;
-
+ 
 namespace CollegeApp.Data.Configuration
 {
     public class StudentConfiguration : IEntityTypeConfiguration<Student>

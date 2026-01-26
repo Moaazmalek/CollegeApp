@@ -4,6 +4,7 @@ using CollegeApp.Configurations;
 using CollegeApp.Data;
 using CollegeApp.DTOs;
 using CollegeApp.Models;
+using CollegeApp.Repositories.Interfaces;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,118 +16,83 @@ namespace CollegeApp.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
-        private readonly CollegeDBContext _context;
+      
         private readonly IMapper _mapper;
+        private readonly IGenericRepository<Student> _repository;
 
-        public StudentController(CollegeDBContext dbContext, IMapper mapper)
+        public StudentController( IMapper mapper,IGenericRepository<Student> repository)
         {
-            _context = dbContext;
+          
             _mapper = mapper;
+            _repository = repository;
         }
 
         [HttpGet("All")]
-        public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
+        public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudents()
         {
-            //Good For Performance but Manual Mapping
-            //var students = await _context.Students.Select(s => new StudentDTO()
-            //{
-            //    Name = s.Name,
-            //    Email = s.Email,
-            //    Address = s.Address,
-            //    DOB = s.DOB
-
-            //}).ToListAsync();
-
-            //Using AutoMapper but bad for performance
-
-            //var students = await _context.Students.ToListAsync();
-            //var studentDTOData=_mapper.Map<List<StudentDTO>>(students);
-
-            //Good for performance and AutoMapper
-            var students = await _context.Students.ProjectTo<StudentDTO>(_mapper.ConfigurationProvider)
-                .ToListAsync();
-            return Ok(students);
+            var students = await _repository.GetAllAsync();
+            return Ok(_mapper.Map<IEnumerable<StudentDTO>>(students));
 
         }
 
         [HttpGet("{id:int}", Name = "GetStudentById")]
         public async Task<ActionResult<Student>> GetStudentById(int id)
         {
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
+            var student = await _repository.GetByIdAsync(id);
             if (student == null) return NotFound();
-            return student;
+            return Ok(student);
         }
 
         [HttpGet("{name:alpha}",Name ="GetStudentByName")]
         public async Task<ActionResult<StudentDTO>> GetStudentByName(string name)
         {
             if(string.IsNullOrEmpty(name)) return BadRequest();
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.Name == name);
-            if (student == null) return NotFound();
-            
-            var studentDto= _mapper.Map<StudentDTO>(student);
-            return Ok(studentDto);
+            var student =await _repository.GetAsync(s => s.Name== name);    
+            if(student == null) return NotFound();
+            return Ok(_mapper.Map<StudentDTO>(student));
         }
 
         [HttpPut("Update")]
         public async Task<ActionResult<StudentDTO>> UpdateStudent([FromBody] StudentDTO model)
         {
+            
             if (model == null || model.Id <= 0) return BadRequest();
+            var student=await _repository.GetByIdAsync(model.Id);
+            if (student == null) return NotFound();
+            _mapper.Map(model, student);
+            await _repository.UpdateAsync(student);
+            return Ok(_mapper.Map<StudentDTO>(student));
 
-            var existingStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == model.Id);
-            if (existingStudent == null) return NotFound();
-
-            var newRecord = _mapper.Map<Student>(model);
-            _context.Students.Update(newRecord);
-           
-            await _context.SaveChangesAsync();
-            return model;
         }
 
-        [HttpPatch("UpdatePartial/{id:int}")]
-        public async Task<ActionResult<StudentDTO>> UpdateStudentPartial(int id, [FromBody] JsonPatchDocument<StudentDTO> patchDocument)
-        {
-            if (patchDocument is null || id <= 0) return BadRequest();
+        //[HttpPatch("UpdatePartial/{id:int}")]
+        //public async Task<ActionResult<StudentDTO>> UpdateStudentPartial(int id, [FromBody] JsonPatchDocument<StudentDTO> patchDocument)
+        //{
+        //    if (patchDocument == null || id <= 0) return BadRequest();
 
-            var existingStudent = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
-            if (existingStudent is null) return NotFound();
-
-            var student = _mapper.Map<StudentDTO>(existingStudent);
-
-            patchDocument.ApplyTo(student, ModelState);
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            existingStudent.Name = student.Name;
-            existingStudent.Email = student.Email;
-            existingStudent.Address = student.Address;
-
-            await _context.SaveChangesAsync();
-            return student;
-        }
+        //    var updatedStudent=await _studentRepository.UpdateStudentPartialAsync(id, patchDocument);
+        //    if (updatedStudent == null) return NotFound();
+        //    return Ok(updatedStudent);
+        //}
 
         [HttpPost("Create")]
         public async Task<IActionResult> CreateStudent([FromBody] StudentDTO model)
         {
             if (model is null) return BadRequest();
 
-            Student student =_mapper.Map<Student>(model);
-
-            await  _context.Students.AddAsync(student);
-            await _context.SaveChangesAsync();
-
-            model.Id = student.Id; // return the generated Id
-
-            return CreatedAtRoute("GetStudentById", new { id = student.Id }, model);
+             var student=_mapper.Map<Student>(model);
+            await _repository.CreateAsync(student);
+            return CreatedAtRoute(
+                "GetStudentById",
+                new { id = student.Id },
+                _mapper.Map<StudentDTO>(student));
         }
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteStudent(int id)
         {
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
-            if (student == null) return NotFound();
-
-            _context.Students.Remove(student);
-            await _context.SaveChangesAsync();
+            var isDeleted = await _repository.DeleteAsync(id);
+            if (isDeleted == false) return NotFound();
             return NoContent();
         }
     }
