@@ -37,6 +37,12 @@ namespace CollegeApp.Data.Configuration
               }
                 ]
               );
+
+            builder.HasOne( n => n.Department)
+                .WithMany(d => d.Students)
+                .HasForeignKey(s => s.DepartmentId).
+                HasConstraintName("FK_Students_Department")
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

@@ -4,6 +4,7 @@ using CollegeApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CollegeApp.Data.Migrations
 {
     [DbContext(typeof(CollegeDBContext))]
-    partial class CollegeDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260127012041_AddDepartmentTable")]
+    partial class AddDepartmentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,13 +50,11 @@ namespace CollegeApp.Data.Migrations
                         new
                         {
                             Id = 1,
-                            DepartmentDescription = "ECE Department",
                             DepartmentName = "ECE"
                         },
                         new
                         {
                             Id = 2,
-                            DepartmentDescription = "CSE Department",
                             DepartmentName = "CSE"
                         });
                 });

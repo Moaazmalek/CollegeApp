@@ -8,7 +8,7 @@ namespace CollegeApp.Data
     {
 
        public DbSet<Student> Students { get; set; }
-
+       public DbSet<Department> Departments { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
          modelBuilder.ApplyConfigurationsFromAssembly(typeof(CollegeDBContext).Assembly);
