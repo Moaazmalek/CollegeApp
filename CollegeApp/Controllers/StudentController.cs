@@ -5,6 +5,7 @@ using CollegeApp.Data;
 using CollegeApp.DTOs;
 using CollegeApp.Models;
 using CollegeApp.Repositories.Interfaces;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ namespace CollegeApp.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("AllowOnlyLocalhost")]
     public class StudentController : ControllerBase
     {
       

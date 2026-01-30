@@ -37,6 +37,44 @@ builder.Services.AddAutoMapper(cfg => { }, typeof(AutoMapperConfig));
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped(typeof(IStudentRepository), typeof(StudentRepository));
 
+////named policy
+//builder.Services.AddCors(options => options.AddPolicy("MyTestCORS", policy =>
+//{
+//    //policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+
+//    //allow only particular origins
+//    //policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod();
+
+//    //
+
+
+
+//}));
+//default policy
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+   
+    options.AddPolicy("AllowOnlyLocalhost", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod();
+    });
+
+    options.AddPolicy("AllowOnlyGoogle", policy =>
+    {
+        policy.WithOrigins("https://www.google.com","https://www.gmail.com").AllowAnyHeader().AllowAnyMethod();
+    });
+    options.AddPolicy("OnlyMicrosoft", policy =>
+    {
+        policy.WithOrigins("https://www.microsoft.com","https://www.bing.com").AllowAnyHeader().AllowAnyMethod();
+    });
+
+
+});
+
 var app = builder.Build();
 
 
@@ -54,7 +92,8 @@ if (app.Environment.IsDevelopment())
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
-
+app.UseCors();
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
