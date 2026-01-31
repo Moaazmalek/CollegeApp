@@ -26,9 +26,38 @@ builder.Services.AddDbContext<CollegeDBContext>(options =>
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(options =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description="JWT Authorization header using the bearer scheme." +
+        "Enter Bearer [Space] add your token in the text input." +
+        "Example : Bearer swagertoken",
+        Name="Authorization",
+        In=ParameterLocation.Header,
+        Scheme="Bearer",
+
+
+
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference=new OpenApiReference
+                {
+                    Type=ReferenceType.SecurityScheme,
+                    Id="Bearer"
+                },
+                Scheme="oauth2",
+                Name="Bearer",
+                In=ParameterLocation.Header
+            },
+            new List<string>()
+        }
+    });
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "College API",
         Version = "v1",
@@ -63,7 +92,7 @@ builder.Services.AddCors(options =>
    
     options.AddPolicy("AllowOnlyLocalhost", policy =>
     {
-        policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod();
+        policy.WithOrigins("http://localhost:4200", "http://localhost:5173").AllowAnyHeader().AllowAnyMethod();
     });
 
     options.AddPolicy("AllowOnlyGoogle", policy =>
@@ -85,7 +114,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
 })
-.AddJwtBearer(options =>
+.AddJwtBearer("LoginForGoogleUsers", options =>
 {
     // Not recommended for production
     options.RequireHttpsMetadata = false;
@@ -103,6 +132,24 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuer = false,
         ValidateAudience = false
 
+    };
+}).AddJwtBearer("LoginForMicrosoftUsers", options =>
+{
+    // Not recommended for production
+    options.RequireHttpsMetadata = false;
+    //Save token in HttpContext
+    options.SaveToken = true;
+    var jwtSecret = builder.Configuration.GetValue<string>("JWTSecret");
+    if (string.IsNullOrEmpty(jwtSecret))
+    {
+        throw new InvalidOperationException("JWTSecret configuration value is missing or empty.");
+    }
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSecret)),
+        ValidateIssuer = false,
+        ValidateAudience = false
     };
 });
 
@@ -125,6 +172,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>

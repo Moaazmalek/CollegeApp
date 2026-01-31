@@ -1,15 +1,13 @@
 ﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using CollegeApp.Configurations;
-using CollegeApp.Data;
 using CollegeApp.DTOs;
 using CollegeApp.Models;
 using CollegeApp.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 
 namespace CollegeApp.Controllers
@@ -17,7 +15,7 @@ namespace CollegeApp.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [EnableCors("AllowOnlyLocalhost")]
-    [Authorize]
+    [Authorize(AuthenticationSchemes ="LoginForGoogleUsers",Roles ="Superadmin,Admin")]
     public class StudentController : ControllerBase
     {
       
@@ -33,7 +31,11 @@ namespace CollegeApp.Controllers
         }
 
         [HttpGet("All")]
-        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        //[AllowAnonymous]
         public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudents()
         {
             var students = await _repository.GetAllAsync();

@@ -23,6 +23,7 @@ const LoginComponent = () => {
     userName: '',
     password: ''
   })
+  const [students, setStudents] = useState([])
   const login=async(formData)=>{
     try{
       const response=await fetch('https://localhost:7096/api/login',{
@@ -44,6 +45,12 @@ const LoginComponent = () => {
   const OnSubmit = (e) => {
     e.preventDefault()
     login(formData)
+  }
+  const getAllStudents = async () => {
+    const res = await fetch('https://localhost:7096/api/student/all')
+    const data = await res.json()
+    console.log(data)
+    setStudents(data)
   }
   return (
     <div>
@@ -71,6 +78,9 @@ const LoginComponent = () => {
         </div>
         <button type="submit">Login</button>
       </form>
+      <button onClick={getAllStudents}>Get All Students</button>
+   
+      {JSON.stringify(students)}
     </div>
   )
 }
