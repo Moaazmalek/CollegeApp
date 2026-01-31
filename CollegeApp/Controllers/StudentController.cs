@@ -5,6 +5,7 @@ using CollegeApp.Data;
 using CollegeApp.DTOs;
 using CollegeApp.Models;
 using CollegeApp.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,7 @@ namespace CollegeApp.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [EnableCors("AllowOnlyLocalhost")]
+    [Authorize]
     public class StudentController : ControllerBase
     {
       
@@ -31,6 +33,7 @@ namespace CollegeApp.Controllers
         }
 
         [HttpGet("All")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudents()
         {
             var students = await _repository.GetAllAsync();

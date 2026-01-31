@@ -3,9 +3,12 @@ using CollegeApp.Configurations;
 using CollegeApp.Data;
 using CollegeApp.Repositories.Implementations;
 using CollegeApp.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -75,6 +78,34 @@ builder.Services.AddCors(options =>
 
 });
 
+// JWT Authentication
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+})
+.AddJwtBearer(options =>
+{
+    // Not recommended for production
+    options.RequireHttpsMetadata = false;
+    //Save token in HttpContext
+    options.SaveToken = true;
+    var jwtSecret = builder.Configuration.GetValue<string>("JWTSecret");
+    if (string.IsNullOrEmpty(jwtSecret))
+    {
+        throw new InvalidOperationException("JWTSecret configuration value is missing or empty.");
+    }
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSecret)),
+        ValidateIssuer = false,
+        ValidateAudience = false
+
+    };
+});
+
 var app = builder.Build();
 
 
@@ -92,9 +123,15 @@ if (app.Environment.IsDevelopment())
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
+app.UseRouting();
 app.UseCors();
 app.UseAuthorization();
-app.MapControllers();
+
+app.UseEndpoints(endpoints =>
+{
+endpoints.MapControllers();
+    endpoints.MapGet("api/Testendpoint", context => context.Response.WriteAsync(builder.Configuration.GetValue<string>("JWTSecret")));
+});
 
 app.Run();
 
