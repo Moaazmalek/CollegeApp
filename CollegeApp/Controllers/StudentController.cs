@@ -22,12 +22,14 @@ namespace CollegeApp.Controllers
         private readonly IMapper _mapper;
         private readonly IGenericRepository<Student> _repository;
         private readonly IStudentRepository _studentRepository;
+        private APIResponse _apiResponse;
 
         public StudentController( IMapper mapper,IGenericRepository<Student> repository,IStudentRepository studentRepository)
         { 
             _mapper = mapper;
             _repository = repository;
             _studentRepository = studentRepository;
+            _apiResponse = new APIResponse();
         }
 
         [HttpGet("All")]
@@ -39,16 +41,24 @@ namespace CollegeApp.Controllers
         public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudents()
         {
             var students = await _repository.GetAllAsync();
-            return Ok(_mapper.Map<IEnumerable<StudentDTO>>(students));
+            _apiResponse.Data=_mapper.Map<IEnumerable<StudentDTO>>(students);
+            _apiResponse.Status = true;
+            _apiResponse.StatusCode = HttpStatusCode.OK;
+            return Ok(_apiResponse);
 
         }
 
         [HttpGet("{id:int}", Name = "GetStudentById")]
-        public async Task<ActionResult<Student>> GetStudentById(int id)
+        public async Task<ActionResult<StudentDTO>> GetStudentById(int id)
         {
             var student = await _repository.GetByIdAsync(id);
             if (student == null) return NotFound();
-            return Ok(student);
+            
+            var studentDTO=_mapper.Map<StudentDTO>(student);
+            _apiResponse.Data=studentDTO;
+            _apiResponse.Status = true;
+            _apiResponse.StatusCode = HttpStatusCode.OK;
+            return Ok(_apiResponse);
         }
 
         [HttpGet("{name:alpha}",Name ="GetStudentByName")]
